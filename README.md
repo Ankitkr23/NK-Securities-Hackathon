@@ -1,4 +1,6 @@
-NK Securities Volatility Curve Prediction - Kaggle Competition Solution
+![image](https://github.com/user-attachments/assets/eb794be1-7758-4101-9664-9d62e3d900d4)
+
+     #NK Securities Volatility Curve Prediction - Kaggle Competition Solution
 This repository presents the solution for the NK Securities Volatility Curve Prediction Kaggle Competition. The primary objective was to accurately forecast implied volatility curves, a critical component in financial modeling and options trading.
 
 Competition Overview
