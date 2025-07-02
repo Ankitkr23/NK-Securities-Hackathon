@@ -1,0 +1,51 @@
+import pandas as pd
+import numpy as np
+
+from sklearn.experimental import enable_iterative_imputer
+from sklearn.impute import IterativeImputer
+from sklearn.ensemble import ExtraTreesRegressor
+from sklearn.preprocessing import StandardScaler
+
+# Load data (first 94 columns)
+df = pd.read_csv("D:\\NK Securities\\test_data.csv", usecols=range(94))
+
+# Separate timestamp and features
+timestamps = df.iloc[:, 0].copy()
+data_for_imputation = df.iloc[:, 1:]
+
+# Scale features before imputation
+scaler = StandardScaler()
+data_scaled = scaler.fit_transform(data_for_imputation)
+
+# Define imputer with ExtraTreesRegressor (non-linear estimator)
+estimator = ExtraTreesRegressor(n_estimators=5, max_depth=10, random_state=0, n_jobs=-1)
+imputer = IterativeImputer(
+    estimator=estimator,
+    max_iter=200,
+    tol=1e-6,
+    initial_strategy="median",
+    sample_posterior=False,
+    random_state=0,
+    verbose=2
+)
+
+# Perform imputation
+X_filled_scaled = imputer.fit_transform(data_scaled)
+
+# Inverse scale the imputed data
+X_filled_all = scaler.inverse_transform(X_filled_scaled)
+
+# Round only the iv_values columns (columns 1 to 53)
+X_filled_iv_only_rounded = X_filled_all.copy()
+X_filled_iv_only_rounded[:, 1:54] = np.round(X_filled_iv_only_rounded[:, 1:54], 6)
+
+# Reassemble DataFrame with timestamp and imputed values
+df_filled = pd.DataFrame(X_filled_iv_only_rounded, columns=data_for_imputation.columns)
+df_filled.insert(0, "timestamp", timestamps)
+
+# Keep only timestamp and iv_values for output
+output_df = df_filled.iloc[:, np.r_[0, 2:55]]
+output_df.to_csv("Submission_Ankit.csv", index=False)
+
+print("Iterative imputation complete → 'Submission_Ankit_2.csv' (iv_values rounded to 6 decimal places)")
+print(f"Shape of the output file: {output_df.shape}")
